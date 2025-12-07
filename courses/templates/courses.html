@@ -1,0 +1,226 @@
+{% extends './layouts/navbar.html' %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courses</title>
+    <style>
+        /* === HEADER DE SECCIÓN === */
+        body {
+            background-color: #101216;
+            color: #FFFFFF;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        .page-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        /* === TARJETA DE CURSO (Minimalista) === */
+        .course-card {
+            background-color: #1A1D21;
+            /* Gris oscuro secundario */
+            border: 1px solid #2C313A;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            /* Igualar altura en la fila */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Efecto Hover: Elevación y Borde Morado */
+        .course-card:hover {
+            transform: translateY(-5px);
+            border-color: #7E57C2;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Decoración superior (Barra de color) */
+        .course-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #7E57C2, #5e35b1);
+            opacity: 0.7;
+        }
+
+        .course-card:hover::before {
+            opacity: 1;
+        }
+
+        /* === TYPOGRAPHY === */
+        .course-title {
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .course-desc {
+            color: #B0B3B8;
+            /* Texto secundario para no cansar la vista */
+            font-size: 0.9rem;
+            line-height: 1.5;
+            /* Limitar a 3 líneas para mantener uniformidad */
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex-grow: 1;
+            /* Empuja el botón hacia abajo */
+        }
+
+        /* === BOTÓN DE ACCIÓN === */
+        .btn-course {
+            margin-top: 1.5rem;
+            color: #7E57C2;
+            background-color: rgba(126, 87, 194, 0.1);
+            border: none;
+            width: 100%;
+            padding: 0.6rem;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .course-card:hover .btn-course {
+            background-color: #7E57C2;
+            color: #FFFFFF;
+        }
+
+        /* Estilo del Botón Primario de Inscripción */
+        .btn-enroll-primary {
+            background-color: #7E57C2;
+            /* Morado Elegante */
+            color: #FFFFFF;
+            border: 1px solid #7E57C2;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            /* Para alinear el texto y el SVG */
+            align-items: center;
+            text-decoration: none;
+        }
+
+        /* Hover: Mayor contraste y elevación */
+        .btn-enroll-primary:hover {
+            background-color: #6a46a8;
+            /* Morado más oscuro */
+            border-color: #6a46a8;
+            color: #FFFFFF;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(126, 87, 194, 0.4);
+            /* Sombra morada */
+        }
+
+        /* Focus: Resaltado de accesibilidad */
+        .btn-enroll-primary:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(126, 87, 194, 0.5);
+        }
+    </style>
+</head>
+
+<!-- <body>
+    <h1>Courses</h1>
+    {% for course in courses %}
+    <h1>{{course.title}}</h1>
+    <p>{{course.description}}</p>
+    {% endfor %}
+</body> -->
+
+<body>
+    <!-- Navbar iría aquí -->
+
+    <div class="container py-5">
+
+        <!-- Encabezado de Sección -->
+        <div class="page-header d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="fw-bold mb-0 ">Mis Cursos</h1>
+                <p class="text-secondary mb-0 small mt-1">Continúa donde lo dejaste</p>
+            </div>
+            <!-- Badge decorativo -->
+            <!-- <span class="badge rounded-pill border border-secondary text-secondary px-3 py-2">
+                Ciclo 2026
+            </span> -->
+
+            <a href="{% url 'enroll_course' %}" class="btn btn-enroll-primary fw-bold px-4 py-2 rounded-pill shadow-sm">
+                Inscribirme ahora
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"
+                    class="ms-2 mb-1">
+                    <path
+                        d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                </svg>
+            </a>
+
+        </div>
+
+        <!-- Grid de Cursos -->
+        <div class="row g-4"> <!-- g-4 da espaciado (gap) entre tarjetas -->
+
+            {% for course in courses %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="course-card p-4">
+
+                    <!-- Icono o Categoría (Visual) -->
+                    <div class="mb-3">
+                        <span
+                            style="background: rgba(126,87,194,0.2); padding: 8px; border-radius: 8px; color: #7E57C2;">
+                            <!-- Icono genérico de libro/curso -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                                viewBox="0 0 16 16">
+                                <path
+                                    d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917l-7.5-3.5Z" />
+                                <path
+                                    d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.43 4.176 9.032Z" />
+                            </svg>
+                        </span>
+                    </div>
+
+                    <!-- Título del Curso -->
+                    <h2 class="course-title"><a href="{% url 'course_detail' course.id %}"
+                            class="text-decoration-none">{{ course.title }}</a></h2>
+
+                    <!-- Descripción del Curso -->
+                    <p class="course-desc">
+                        {{ course.description }}
+                    </p>
+
+                    <!-- Botón de Acción (Simulado, ya que el loop original no tenía link) -->
+                    <!-- Si tu objeto course tiene una URL, reemplaza el # con {{ course.get_absolute_url }} -->
+                    <a href="{% url 'course_detail' course.id %}"
+                        class="btn btn-course text-decoration-none text-center">
+                        Continuar Aprendiendo
+                    </a>
+
+                </div>
+            </div>
+            {% empty %}
+            <!-- Estado vacío por si no hay cursos -->
+            <div class="col-12 text-center py-5">
+                <p class="text-secondary">Aún no tienes cursos inscritos.</p>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+    <!-- Scripts de Bootstrap necesarios -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
+{% endblock %}

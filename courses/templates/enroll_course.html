@@ -1,0 +1,157 @@
+{% extends 'layouts/navbar.html' %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enroll Course</title>
+    <style>
+        /* === HEADER === */
+        .catalog-header {
+            margin-bottom: 3rem;
+            border-bottom: 1px solid rgba(126, 87, 194, 0.2);
+            /* Línea sutil morada */
+            padding-bottom: 1rem;
+        }
+
+        /* === CARD DE INSCRIPCIÓN === */
+        .enroll-card {
+            background-color: #1A1D21;
+            border: 1px solid #2C313A;
+            border-radius: 12px;
+            padding: 1.5rem;
+            height: 100%;
+            /* Misma altura en filas */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+
+        .enroll-card:hover {
+            transform: translateY(-5px);
+            border-color: #7E57C2;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        /* === TYPOGRAPHY === */
+        .enroll-title {
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .enroll-desc {
+            color: #B0B3B8;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        /* === BOTÓN AÑADIR (Submit) === */
+        .btn-add-course {
+            width: 100%;
+            background-color: transparent;
+            border: 1px solid #7E57C2;
+            color: #7E57C2;
+            font-weight: 600;
+            padding: 0.6rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            /* Espacio entre texto e icono */
+        }
+
+        .btn-add-course:hover {
+            background-color: #7E57C2;
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(126, 87, 194, 0.3);
+        }
+    </style>
+</head>
+
+<!-- <body>
+    <h1>Cursos disponibles</h1>
+    {% for course in courses %}
+    <h2>{{course.title}}</h2>
+    <p>{{course.description}}</p>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="course_id" value="{{ course.id }}">
+        <button type="submit">Añadir</button>
+    </form>
+    {% endfor %}
+</body> -->
+
+<body>
+    <div class="container py-5">
+
+        <div class="catalog-header d-flex justify-content-between align-items-end">
+            <div>
+                <h1 class="display-6 fw-bold text-white mb-0">Cursos Disponibles</h1>
+                <p class="text-secondary mb-0 mt-1">Selecciona y añade nuevas materias a tu plan.</p>
+            </div>
+            <div class="d-none d-md-block text-secondary small">
+                Mindel Academic v2.0
+            </div>
+        </div>
+
+        <div class="row g-4">
+
+            {% for course in courses %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <article class="enroll-card">
+
+                    <div>
+                        <div class="mb-3">
+                            <span
+                                style="color: #7E57C2; background: rgba(126,87,194,0.1); padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold;">
+                                CURSO
+                            </span>
+                        </div>
+
+                        <h2 class="enroll-title">{{ course.title }}</h2>
+                        <p class="enroll-desc">{{ course.description|truncatewords:20 }}</p>
+                    </div>
+
+                    <div class="mt-auto">
+                        <form method="POST">
+                            {% csrf_token %}
+
+                            <input type="hidden" name="course_id" value="{{ course.id }}">
+
+                            <button type="submit" class="btn-add-course">
+                                <span>Añadir Curso</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                                    viewBox="0 0 16 16">
+                                    <path
+                                        d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+
+                </article>
+            </div>
+
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <div class="text-secondary fs-4">No hay cursos disponibles para añadir en este momento.</div>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
+{% endblock %}

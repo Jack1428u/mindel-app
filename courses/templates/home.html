@@ -1,0 +1,221 @@
+{% extends './layouts/navbar.html' %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindel</title>
+
+    <style>
+        /* === GENERAL === */
+        body {
+            background-color: #101216;
+            /* Negro Espacial */
+            color: #FFFFFF;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        /* === FORMULARIO DJANGO === */
+        /* Estilizamos los inputs generados por {{ form.as_p }} */
+        .django-form p {
+            margin-bottom: 1.5rem;
+        }
+
+        .django-form label {
+            display: block;
+            color: #B0B3B8;
+            /* Gris claro */
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .django-form input,
+        .django-form select,
+        .django-form textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: #1A1D21;
+            /* Ligeramente más claro que el fondo */
+            border: 1px solid #2C313A;
+            border-radius: 8px;
+            color: #FFFFFF;
+            transition: all 0.3s ease;
+        }
+
+        /* Focus en inputs: Borde Morado */
+        .django-form input:focus,
+        .django-form select:focus {
+            outline: none;
+            border-color: #7E57C2;
+            box-shadow: 0 0 0 3px rgba(126, 87, 194, 0.2);
+        }
+
+        /* === COMPONENTES === */
+        .glass-card {
+            background: rgba(26, 29, 33, 0.95);
+            border: 1px solid rgba(126, 87, 194, 0.3);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .text-purple {
+            color: #7E57C2 !important;
+        }
+
+        /* Botón Submit */
+        .btn-submit {
+            background-color: #7E57C2;
+            color: white;
+            width: 100%;
+            padding: 12px;
+            border-radius: 50px;
+            font-weight: 600;
+            border: none;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: #6a46a8;
+            transform: translateY(-2px);
+        }
+
+        /* Tarjetas de Información (Features) */
+        .feature-card {
+            background-color: #1A1D21;
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .feature-card:hover {
+            border-color: #7E57C2;
+            transform: translateY(-5px);
+            background-color: #1F2229;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="container py-5 my-5">
+        <div class="row align-items-center">
+
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <span class="badge rounded-pill px-3 py-2 mb-3"
+                    style="background-color: rgba(126, 87, 194, 0.2); color: #7E57C2; border: 1px solid #7E57C2;">
+                    🚀 Admisión 2025
+                </span>
+                <h1 class="display-3 fw-bold mb-3 lh-1">
+                    Potencia tu ingreso a la <span class="text-purple">Universidad</span>
+                </h1>
+                <p class="lead text-secondary mb-4" style="max-width: 90%;">
+                    Prepárate para las mejores universidades nacionales de Lima con recursos concisos y una metodología
+                    directa. En Mindel, cerramos brechas con tecnología accesible.
+                </p>
+
+                <div class="d-flex gap-4 pt-2">
+                    <div>
+                        <h4 class="fw-bold mb-0 text-white">100%</h4>
+                        <small class="text-secondary">Clases Concisas</small>
+                    </div>
+                    <div style="border-left: 1px solid #2C313A;"></div>
+                    <div>
+                        <h4 class="fw-bold mb-0 text-white">24/7</h4>
+                        <small class="text-secondary">Acceso Digital</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5 offset-lg-1">
+                <div class="glass-card p-4 p-md-5">
+                    <h3 class="text-center fw-bold mb-4">Crea tu cuenta</h3>
+
+                    <form method="POST" class="django-form">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn-submit shadow">
+                                Empezar a estudiar
+                            </button>
+                        </div>
+                    </form>
+
+                    <p class="text-center text-secondary mt-3 fs-6">
+                        ¿Ya tienes cuenta? <a href="{% url 'login' %}"
+                            class="text-purple text-decoration-none fw-bold">Inicia sesión</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container py-5 mb-5">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="fw-bold">Nuestra Filosofía</h2>
+                <p class="text-secondary">Menos ruido, más aprendizaje.</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="fs-1 mb-3">🎯</div>
+                    <h4 class="fw-bold mb-3">Recursos Concisos</h4>
+                    <p class="text-secondary small">
+                        Sin relleno. Entregamos material directo para maximizar tu tiempo de estudio y mejorar tu
+                        rendimiento académico.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="fs-1 mb-3">⚡</div>
+                    <h4 class="fw-bold mb-3">Innovación Ágil</h4>
+                    <p class="text-secondary small">
+                        Plataforma rápida y minimalista diseñada para que te enfoques únicamente en aprender y medir tu
+                        progreso.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="fs-1 mb-3">🎓</div>
+                    <h4 class="fw-bold mb-3">Ingreso Seguro</h4>
+                    <p class="text-secondary small">
+                        Nuestro objetivo es tu vacante en universidades de prestigio mediante un aprendizaje medible y
+                        efectivo.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </section>
+    <footer class="footer mt-auto py-3">
+        <div class="container text-center">
+            <!-- <span>Created with ❤️ by <a class="text-purple text-decoration-none"
+                    href="https://linkedin.com/in/jack-gonzalo-utrilla-fernández-6991b4367">Jack Utrilla</a></span>  -->
+            <span class="text-secondary">Created with ❤️ by
+                <a class="text-purple text-decoration-none fw-medium"
+                    href="https://linkedin.com/in/jack-gonzalo-utrilla-fernández-6991b4367" target="_blank"
+                    style="transition: color 0.2s ease;">
+                    Jack Utrilla
+                </a>
+            </span>
+        </div>
+
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
+
+{% endblock %}
