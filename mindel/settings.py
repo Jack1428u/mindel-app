@@ -2,21 +2,22 @@ import dj_database_url
 from pathlib import Path
 import os
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Quick-start development settings
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-clave-temporal-dev')
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+# DEBUG debe ser False en Render.
+# Se asume que en Render tienes la variable de entorno RENDER=true
+DEBUG = 'RENDER' not in os.environ
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-b53u3nb-u8(b$kl^%!sn-jp+s_*!mrsyu2gt(_ke1yv=09ljup'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+# === 1. CORRECCIÓN CRÍTICA: ALLOWED_HOSTS ===
+# Si estamos en Render, obtenemos el host automáticamente.
+if not DEBUG:
+    ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
+else:
+    ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -28,12 +29,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Apps de terceros necesarias
+    'storages', # Para S3
+    # Tus apps
     'courses',
-    'storages',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Whitenoise debe ir justo después de SecurityMiddleware
     'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -41,6 +45,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # NOTA: Se eliminó CorsMiddleware porque no usas React externo.
 ]
 
 ROOT_URLCONF = 'mindel.urls'
@@ -48,7 +53,7 @@ ROOT_URLCONF = 'mindel.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'], # Asegúrate de tener tu carpeta templates aquí si la usas
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -64,93 +69,61 @@ WSGI_APPLICATION = 'mindel.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),  # ← Esto usa la URL de Render
+        default=os.environ.get('DATABASE_URL'),
         conn_max_age=600,
         conn_health_checks=True,
     )
 }
 
 
-
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
 ]
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+LANGUAGE_CODE = 'es-pe' # Puedes poner 'es-pe' o 'es-es'
+TIME_ZONE = 'America/Lima' # Ajustado a tu región
 USE_I18N = True
-
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# === ARCHIVOS ESTÁTICOS (CSS, JS, IMÁGENES DEL SISTEMA) ===
+# Se sirven con Whitenoise desde el servidor local
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-if not DEBUG:
-    # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# Motor de almacenamiento para Whitenoise (Compresión y caché)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-    # Enable the WhiteNoise storage backend, which compresses static files to reduce disk use
-    # and renames the files with unique names for each version to support long-term caching
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-LOGIN_URL = '/signin'  # URL LOGIN BY DEFAULT
+# === ARCHIVOS MEDIA (SUBIDOS POR USUARIOS - PDFs, FOTOS) ===
+# Se sirven con Amazon S3
 
-# Las claves se cargan automáticamente desde las Variables de Entorno de Render
+# Credenciales (Desde Variables de Entorno de Render)
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-
-# === ⚙️ CONFIGURACIÓN DEL BUCKET Y REGIÓN ===
-
 AWS_STORAGE_BUCKET_NAME = 'mindel-app-media'
-AWS_S3_REGION_NAME = 'sa-east-1' 
+AWS_S3_REGION_NAME = 'sa-east-1'
+AWS_S3_SIGNATURE_VERSION = 's3v4' # Recomendado para regiones nuevas
 
-# Ruta dentro del bucket (ej. /media/pdf_subido.pdf)
-AWS_LOCATION = 'media' 
-
-# === 🔗 REEMPLAZO DE MEDIA_URL y DEFAULT_FILE_STORAGE ===
-
-# 1. Define el motor de almacenamiento predeterminado para archivos subidos
+# Configuración S3
+AWS_LOCATION = 'media' # Carpeta dentro del bucket
 DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
-
-# 2. MEDIA_URL ahora es la URL de S3, no una URL local.
 MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/{AWS_LOCATION}/'
 
+
+# Login URL
+LOGIN_URL = '/signin'
+LOGIN_REDIRECT_URL = 'courses' # A donde va después de loguearse
+LOGOUT_REDIRECT_URL = 'home'   # A donde va después de salir
+
+
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-# settings.py
-
-# Si estás usando Django-CSP, debes añadir estas directivas:
-CSP_DEFAULT_SRC = ("'self'",)
-CSP_FRAME_SRC = ("'self'", "https://www.youtube.com", "https://youtu.be")
-CSP_MEDIA_SRC = ("'self'", "https://www.youtube.com", "https://youtu.be")
-CSP_IMG_SRC = ("'self'", "data:", "https://i.ytimg.com")
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
