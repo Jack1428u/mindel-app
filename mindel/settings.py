@@ -11,12 +11,9 @@ if 'RENDER' in os.environ:
 else:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'CLAVE_TEMPORAL_SOLO_PARA_DESARROLLO')
 
-# DEBUG debe ser False en Render.
-# Se asume que en Render tienes la variable de entorno RENDER=true
+
 DEBUG = 'RENDER' not in os.environ
 
-# === 1. CORRECCIÓN CRÍTICA: ALLOWED_HOSTS ===
-# Si estamos en Render, obtenemos el host automáticamente.
 if not DEBUG:
     ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
 else:
@@ -89,8 +86,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-LANGUAGE_CODE = 'es-pe' # Puedes poner 'es-pe' o 'es-es'
-TIME_ZONE = 'America/Lima' # Ajustado a tu región
+LANGUAGE_CODE = 'es-pe' 
+TIME_ZONE = 'America/Lima' 
 USE_I18N = True
 USE_TZ = True
 
@@ -99,37 +96,49 @@ USE_TZ = True
 # Whitenoise siempre debe estar activo para servir el admin y tus estilos
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# === 2. ARCHIVOS MEDIA (SUBIDOS POR USUARIOS - PDFs, FOTOS) ===
+# === CONFIGURACIÓN DE ALMACENAMIENTO (SINTAXIS MODERNA DJANGO 4.2+) ===
 
 if 'RENDER' in os.environ:
-    # --- CONFIGURACIÓN DE PRODUCCIÓN (AMAZON S3) ---
+    # --- PROD: AMAZON S3 ---
     
-    # Credenciales
     AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
     AWS_STORAGE_BUCKET_NAME = 'mindel-app-media'
-    
-    # ⚠️ CRÍTICO: Revisa tu consola AWS. Si el bucket dice "Ohio", pon 'us-east-2'.
-    # Si dice "São Paulo", deja 'sa-east-1'.
-    AWS_S3_REGION_NAME = 'sa-east-1' 
-
-    # Configuraciones de compatibilidad y seguridad
+    AWS_S3_REGION_NAME = 'sa-east-1'
     AWS_S3_SIGNATURE_VERSION = 's3v4'
-    AWS_QUERYSTRING_AUTH = False       # URLs limpias sin tokens
-    AWS_DEFAULT_ACL = None             # Usar política del bucket, no ACLs individuales
+    AWS_QUERYSTRING_AUTH = False
+    AWS_DEFAULT_ACL = None
+    AWS_LOCATION = 'media'
 
-    # Configuración de Rutas
-    AWS_LOCATION = 'media'             # Guardar archivos en carpeta 'media' del bucket
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
-    
-    # Construcción de la URL pública
+    # Usamos el diccionario STORAGES en lugar de DEFAULT_FILE_STORAGE
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "location": AWS_LOCATION,
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+
+    # URL pública para acceder a los archivos
     MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/{AWS_LOCATION}/'
 
 else:
-    # --- CONFIGURACIÓN DE DESARROLLO LOCAL (DISCO DURO) ---
-    # Esto permite trabajar sin internet o sin credenciales de AWS en tu PC
+    # --- DEV: LOCAL DISK ---
+    
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -141,3 +150,4 @@ LOGOUT_REDIRECT_URL = 'home'   # A donde va después de salir
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
