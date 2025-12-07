@@ -40,7 +40,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    # Whitenoise debe ir justo después de SecurityMiddleware
     'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -48,7 +47,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # NOTA: Se eliminó CorsMiddleware porque no usas React externo.
 ]
 
 ROOT_URLCONF = 'mindel.urls'
@@ -97,30 +95,43 @@ USE_I18N = True
 USE_TZ = True
 
 
-# === ARCHIVOS ESTÁTICOS (CSS, JS, IMÁGENES DEL SISTEMA) ===
-# Se sirven con Whitenoise desde el servidor local
-STATIC_URL = 'static/'
+# === 1. ARCHIVOS ESTÁTICOS (CSS, JS, IMÁGENES DEL SISTEMA) ===
+# Whitenoise siempre debe estar activo para servir el admin y tus estilos
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# Motor de almacenamiento para Whitenoise (Compresión y caché)
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# === 2. ARCHIVOS MEDIA (SUBIDOS POR USUARIOS - PDFs, FOTOS) ===
 
-# === ARCHIVOS MEDIA (SUBIDOS POR USUARIOS - PDFs, FOTOS) ===
-# Se sirven con Amazon S3
+if 'RENDER' in os.environ:
+    # --- CONFIGURACIÓN DE PRODUCCIÓN (AMAZON S3) ---
+    
+    # Credenciales
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = 'mindel-app-media'
+    
+    # ⚠️ CRÍTICO: Revisa tu consola AWS. Si el bucket dice "Ohio", pon 'us-east-2'.
+    # Si dice "São Paulo", deja 'sa-east-1'.
+    AWS_S3_REGION_NAME = 'sa-east-1' 
 
-# Credenciales (Desde Variables de Entorno de Render)
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = 'mindel-app-media'
-AWS_S3_REGION_NAME = 'sa-east-1'
-AWS_S3_SIGNATURE_VERSION = 's3v4' # Recomendado para regiones nuevas
+    # Configuraciones de compatibilidad y seguridad
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
+    AWS_QUERYSTRING_AUTH = False       # URLs limpias sin tokens
+    AWS_DEFAULT_ACL = None             # Usar política del bucket, no ACLs individuales
 
-# Configuración S3
-AWS_LOCATION = 'media' # Carpeta dentro del bucket
-DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
-MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/{AWS_LOCATION}/'
+    # Configuración de Rutas
+    AWS_LOCATION = 'media'             # Guardar archivos en carpeta 'media' del bucket
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
+    
+    # Construcción de la URL pública
+    MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/{AWS_LOCATION}/'
 
+else:
+    # --- CONFIGURACIÓN DE DESARROLLO LOCAL (DISCO DURO) ---
+    # Esto permite trabajar sin internet o sin credenciales de AWS en tu PC
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Login URL
 LOGIN_URL = '/signin'
