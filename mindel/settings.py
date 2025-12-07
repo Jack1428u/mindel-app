@@ -6,7 +6,10 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-clave-temporal-dev')
+if 'RENDER' in os.environ:
+    SECRET_KEY = os.environ['SECRET_KEY'] 
+else:
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'CLAVE_TEMPORAL_SOLO_PARA_DESARROLLO')
 
 # DEBUG debe ser False en Render.
 # Se asume que en Render tienes la variable de entorno RENDER=true
