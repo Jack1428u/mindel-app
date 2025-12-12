@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Apps de terceros necesarias
     'storages', # Para S3
-    # Tus apps
+    # apps
     'courses',
 ]
 
@@ -75,7 +75,6 @@ DATABASES = {
     )
 }
 
-
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
@@ -93,7 +92,6 @@ USE_TZ = True
 
 
 # === 1. ARCHIVOS ESTÁTICOS (CSS, JS, IMÁGENES DEL SISTEMA) ===
-# Whitenoise siempre debe estar activo para servir el admin y tus estilos
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
@@ -108,7 +106,7 @@ if 'RENDER' in os.environ:
     AWS_S3_REGION_NAME = 'sa-east-1'
     AWS_S3_SIGNATURE_VERSION = 's3v4'
     AWS_QUERYSTRING_AUTH = False
-    AWS_DEFAULT_ACL = None
+    AWS_DEFAULT_ACL = 'public-read' # Permite que los archivos sean públicos            
     AWS_LOCATION = 'media'
 
     # Usamos el diccionario STORAGES en lugar de DEFAULT_FILE_STORAGE
