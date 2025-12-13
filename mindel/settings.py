@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if 'RENDER' in os.environ:
     SECRET_KEY = os.environ['SECRET_KEY'] 
 else:
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'CLAVE_TEMPORAL_SOLO_PARA_DESARROLLO')
+    SECRET_KEY = os.environ.get('SECRET_KEY')
 
 
 DEBUG = 'RENDER' not in os.environ
@@ -105,8 +105,9 @@ if 'RENDER' in os.environ:
     AWS_STORAGE_BUCKET_NAME = 'mindel-app-media'
     AWS_S3_REGION_NAME = 'sa-east-1'
     AWS_S3_SIGNATURE_VERSION = 's3v4'
-    AWS_QUERYSTRING_AUTH = False
-    AWS_DEFAULT_ACL = 'public-read' # Permite que los archivos sean públicos            
+    AWS_QUERYSTRING_AUTH = True  # Genera URLs firmadas temporalmente
+    AWS_QUERYSTRING_EXPIRE = 86400  # URLs válidas por 24 horas (en segundos)
+    AWS_DEFAULT_ACL = None  # Archivos privados, acceso mediante URL firmada
     AWS_LOCATION = 'media'
 
     # Usamos el diccionario STORAGES en lugar de DEFAULT_FILE_STORAGE
